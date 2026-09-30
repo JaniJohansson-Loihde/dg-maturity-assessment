@@ -1,7 +1,630 @@
 <!DOCTYPE html>
-<html>
+<html lang="fi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Data Governance Assessment: arvioi organisaatiosi tiedonhallinnan nykytila ja valmius hyödyntää dataa, analytiikkaa ja tekoälyä.">
+  <title>Data Governance Assessment</title>
+  <style>
+    :root {
+      --purple: #6f2c91;
+      --purple-dark: #43145c;
+      --purple-light: #f2eaf6;
+      --coral: #ef6a4c;
+      --ink: #17151a;
+      --muted: #68636d;
+      --line: #e8e3eb;
+      --surface: #ffffff;
+      --background: #f7f5f8;
+      --success: #18765a;
+      --shadow: 0 18px 50px rgba(50, 25, 61, 0.10);
+      --radius: 24px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top right, rgba(111,44,145,.13), transparent 34rem),
+        linear-gradient(180deg, #fff 0%, var(--background) 100%);
+      min-height: 100vh;
+    }
+
+    button, input { font: inherit; }
+    button { cursor: pointer; }
+    button:focus-visible, input:focus-visible, a:focus-visible {
+      outline: 3px solid rgba(111,44,145,.28);
+      outline-offset: 3px;
+    }
+
+    .topbar {
+      width: min(1120px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 24px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 800;
+      letter-spacing: -.02em;
+    }
+
+    .brand-mark {
+      width: 42px;
+      height: 42px;
+      border-radius: 14px 14px 14px 4px;
+      background: linear-gradient(135deg, var(--purple), var(--coral));
+      position: relative;
+      box-shadow: 0 8px 18px rgba(111,44,145,.22);
+    }
+
+    .brand-mark::after {
+      content: "";
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      background: white;
+      border-radius: 50%;
+      right: 8px;
+      top: 8px;
+    }
+
+    .prototype {
+      color: var(--muted);
+      font-size: 13px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.8);
+      padding: 8px 12px;
+      border-radius: 999px;
+    }
+
+    .shell {
+      width: min(1120px, calc(100% - 32px));
+      margin: 0 auto 64px;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.25fr .75fr;
+      gap: 28px;
+      align-items: stretch;
+      margin-top: 18px;
+    }
+
+    .hero-copy, .hero-card, .assessment, .results {
+      background: rgba(255,255,255,.94);
+      border: 1px solid rgba(111,44,145,.10);
+      box-shadow: var(--shadow);
+      border-radius: var(--radius);
+    }
+
+    .hero-copy { padding: clamp(30px, 5vw, 68px); }
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--purple);
+      font-weight: 700;
+      font-size: 14px;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      margin-bottom: 18px;
+    }
+    .eyebrow::before {
+      content: "";
+      width: 24px;
+      height: 3px;
+      border-radius: 999px;
+      background: var(--coral);
+    }
+
+    h1 {
+      font-size: clamp(38px, 6vw, 68px);
+      line-height: .98;
+      letter-spacing: -.055em;
+      margin: 0 0 24px;
+      max-width: 820px;
+    }
+    .lead {
+      font-size: clamp(18px, 2vw, 22px);
+      line-height: 1.55;
+      color: var(--muted);
+      max-width: 760px;
+      margin: 0 0 30px;
+    }
+
+    .primary, .secondary {
+      border: 0;
+      border-radius: 14px;
+      padding: 15px 22px;
+      font-weight: 700;
+      transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
+    }
+    .primary {
+      color: white;
+      background: var(--purple);
+      box-shadow: 0 10px 24px rgba(111,44,145,.24);
+    }
+    .primary:hover { transform: translateY(-2px); background: var(--purple-dark); }
+    .secondary { color: var(--purple); background: var(--purple-light); }
+    .secondary:hover { transform: translateY(-2px); }
+
+    .hero-card {
+      padding: 30px;
+      background: linear-gradient(155deg, var(--purple-dark), var(--purple));
+      color: white;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow: hidden;
+      position: relative;
+    }
+    .hero-card::after {
+      content: "";
+      position: absolute;
+      width: 220px; height: 220px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.08);
+      right: -80px; bottom: -80px;
+    }
+    .hero-card h2 { font-size: 28px; margin: 0 0 10px; }
+    .hero-card p { line-height: 1.55; color: rgba(255,255,255,.78); }
+    .facts { display: grid; gap: 12px; margin-top: 22px; position: relative; z-index: 1; }
+    .fact { display: flex; gap: 10px; align-items: center; font-weight: 700; }
+    .fact span:first-child {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: rgba(255,255,255,.16);
+      display: grid; place-items: center;
+    }
+
+    .assessment { margin-top: 28px; padding: clamp(22px, 4vw, 44px); display: none; }
+    .assessment.active { display: block; }
+    .progress-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 12px; }
+    .progress-label { color: var(--muted); font-size: 14px; font-weight: 700; }
+    .progress-track { height: 9px; background: #eee9f0; border-radius: 999px; overflow: hidden; }
+    .progress-bar { height: 100%; width: 0; background: linear-gradient(90deg, var(--purple), var(--coral)); transition: width .3s ease; }
+
+    .category-chip {
+      display: inline-block;
+      margin-top: 32px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: var(--purple-light);
+      color: var(--purple);
+      font-size: 14px;
+      font-weight: 700;
+    }
+    .question-number { color: var(--muted); margin: 18px 0 8px; font-size: 14px; }
+    #questionText { font-size: clamp(26px, 4vw, 38px); line-height: 1.18; letter-spacing: -.025em; margin: 0; max-width: 900px; }
+
+    .scale-help { color: var(--muted); font-size: 14px; margin: 28px 0 12px; }
+    .choices { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+    .choice {
+      appearance: none;
+      border: 1px solid var(--line);
+      background: white;
+      border-radius: 18px;
+      padding: 18px 10px;
+      min-height: 94px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      color: var(--ink);
+      transition: .18s ease;
+    }
+    .choice:hover { transform: translateY(-2px); border-color: var(--purple); }
+    .choice.selected { background: var(--purple); color: white; border-color: var(--purple); box-shadow: 0 10px 24px rgba(111,44,145,.2); }
+    .choice strong { font-size: 26px; }
+    .choice small { line-height: 1.25; text-align: center; color: inherit; opacity: .76; }
+    .nav-row { display: flex; justify-content: space-between; gap: 12px; margin-top: 28px; }
+    .error { color: #a33131; font-weight: 700; min-height: 24px; margin-top: 14px; }
+
+    .results { display: none; margin-top: 28px; padding: clamp(24px, 5vw, 52px); }
+    .results.active { display: block; }
+    .results-grid { display: grid; grid-template-columns: .85fr 1.15fr; gap: 28px; align-items: start; }
+    .score-panel {
+      background: linear-gradient(155deg, var(--purple-dark), var(--purple));
+      color: white;
+      border-radius: 22px;
+      padding: 30px;
+    }
+    .score-panel p { color: rgba(255,255,255,.78); line-height: 1.55; }
+    .score-number { font-size: 64px; font-weight: 800; letter-spacing: -.06em; line-height: 1; margin: 12px 0; }
+    .level { display: inline-block; background: rgba(255,255,255,.14); padding: 10px 14px; border-radius: 999px; font-weight: 700; }
+    .insights { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 18px; }
+    .insight { border: 1px solid var(--line); border-radius: 18px; padding: 20px; background: white; }
+    .insight small { display: block; color: var(--muted); margin-bottom: 8px; }
+    .insight strong { color: var(--purple-dark); }
+
+    .chart-card { border: 1px solid var(--line); border-radius: 22px; padding: 20px; background: white; }
+    canvas { display: block; width: 100%; max-width: 520px; height: auto; margin: auto; }
+    .category-scores { display: grid; gap: 14px; margin-top: 20px; }
+    .score-row-header { display: flex; justify-content: space-between; gap: 10px; font-size: 14px; margin-bottom: 6px; }
+    .mini-track { height: 8px; border-radius: 999px; background: #eee9f0; overflow: hidden; }
+    .mini-fill { height: 100%; background: linear-gradient(90deg, var(--purple), var(--coral)); border-radius: inherit; }
+
+    .cta {
+      margin-top: 28px;
+      background: #17151a;
+      color: white;
+      border-radius: 22px;
+      padding: clamp(24px, 4vw, 40px);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+    }
+    .cta h3 { font-size: 28px; margin: 0 0 8px; }
+    .cta p { color: rgba(255,255,255,.72); margin: 0; line-height: 1.5; max-width: 720px; }
+    .cta .primary { background: white; color: var(--purple-dark); box-shadow: none; white-space: nowrap; }
+    .privacy-note { color: var(--muted); font-size: 13px; line-height: 1.5; margin-top: 18px; }
+
+    footer { width: min(1120px, calc(100% - 32px)); margin: 0 auto; padding: 0 0 34px; color: var(--muted); font-size: 13px; }
+
+    @media (max-width: 820px) {
+      .hero, .results-grid { grid-template-columns: 1fr; }
+      .hero-card { min-height: 320px; }
+      .choices { grid-template-columns: 1fr; }
+      .choice { min-height: auto; flex-direction: row; justify-content: flex-start; padding: 14px 18px; }
+      .choice small { text-align: left; }
+      .cta { flex-direction: column; align-items: flex-start; }
+      .insights { grid-template-columns: 1fr; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      * { scroll-behavior: auto !important; transition: none !important; }
+    }
+  </style>
+</head>
 <body>
-<h1>Data Governance Assessment</h1>
-<p>Ensimmäinen testisivuni.</p>
+  <header class="topbar">
+    <div class="brand" aria-label="Data Governance Assessment">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span>Data Governance Assessment</span>
+    </div>
+    <span class="prototype">MVP | Ei tallenna vastauksia</span>
+  </header>
+
+  <main class="shell">
+    <section class="hero" id="hero">
+      <div class="hero-copy">
+        <div class="eyebrow">Data Governance & AI Readiness</div>
+        <h1>Onko datanne valmis tiedolla johtamiseen ja tekoälyyn?</h1>
+        <p class="lead">Arvioi organisaatiosi tiedonhallinnan nykytila 12 väittämän avulla. Saat heti kokonaisarvion, osa-aluekohtaiset tulokset sekä tärkeimmän kehityskohteen.</p>
+        <button class="primary" id="startButton" type="button">Aloita arviointi</button>
+      </div>
+      <aside class="hero-card" aria-label="Arvioinnin tiedot">
+        <div>
+          <h2>Nopea tilannekuva</h2>
+          <p>Itsearviointi auttaa tunnistamaan, kuinka hyvin vastuut, tiedon laatu, tiedon hallinta ja AI-valmius tukevat liiketoimintaa.</p>
+        </div>
+        <div class="facts">
+          <div class="fact"><span>12</span><span>selkeää väittämää</span></div>
+          <div class="fact"><span>4</span><span>tiedonhallinnan osa-aluetta</span></div>
+          <div class="fact"><span>✓</span><span>välitön tulos selaimessa</span></div>
+        </div>
+      </aside>
+    </section>
+
+    <section class="assessment" id="assessment" aria-live="polite">
+      <div class="progress-row">
+        <span class="progress-label" id="progressLabel">1 / 12</span>
+        <span class="progress-label" id="progressPercent">8 %</span>
+      </div>
+      <div class="progress-track" aria-hidden="true"><div class="progress-bar" id="progressBar"></div></div>
+
+      <span class="category-chip" id="categoryChip"></span>
+      <div class="question-number" id="questionNumber"></div>
+      <h2 id="questionText"></h2>
+
+      <p class="scale-help">Valitse vaihtoehto, joka kuvaa organisaationne nykytilaa parhaiten.</p>
+      <div class="choices" id="choices"></div>
+      <div class="error" id="errorMessage" role="alert"></div>
+
+      <div class="nav-row">
+        <button class="secondary" id="backButton" type="button">Edellinen</button>
+        <button class="primary" id="nextButton" type="button">Seuraava</button>
+      </div>
+    </section>
+
+    <section class="results" id="results" aria-live="polite">
+      <div class="eyebrow">Arvioinnin tulos</div>
+      <div class="results-grid">
+        <div>
+          <div class="score-panel">
+            <div>Kokonaispisteet</div>
+            <div class="score-number"><span id="overallScore">0,0</span><small style="font-size:24px"> / 5</small></div>
+            <span class="level" id="maturityLevel"></span>
+            <h2 id="resultHeadline" style="margin:24px 0 8px"></h2>
+            <p id="resultDescription"></p>
+          </div>
+          <div class="insights">
+            <div class="insight"><small>Vahvin osa-alue</small><strong id="strongestArea"></strong></div>
+            <div class="insight"><small>Tärkein kehityskohde</small><strong id="developmentArea"></strong></div>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <canvas id="radarChart" width="620" height="500" aria-label="Osa-aluekohtainen tutkakuvio"></canvas>
+          <div class="category-scores" id="categoryScores"></div>
+        </div>
+      </div>
+
+      <div class="cta">
+        <div>
+          <h3>Haluatko syventää tulosta?</h3>
+          <p>Varaa maksuton keskustelu, jossa käymme läpi tuloksen, tärkeimmät kehityskohteet ja käytännöllisen etenemispolun.</p>
+        </div>
+        <button class="primary" id="contactButton" type="button">Varaa maksuton sparraus</button>
+      </div>
+      <p class="privacy-note">Tämä MVP laskee tuloksen vain selaimessasi. Vastauksia tai yhteystietoja ei tallenneta eikä lähetetä mihinkään. Yhteydenottopainike on prototyypissä esimerkkitoiminto.</p>
+      <div class="nav-row">
+        <button class="secondary" id="restartButton" type="button">Tee arviointi uudelleen</button>
+      </div>
+    </section>
+  </main>
+
+  <footer>Prototyyppi sisäiseen arviointiin. Tarkista brändi, tietosuoja ja yhteydenottopolku ennen julkista käyttöä.</footer>
+
+  <script>
+    const questions = [
+      { category: "Vastuut ja omistajuus", text: "Tärkeimmille tiedoillemme on nimetty selkeä omistaja." },
+      { category: "Vastuut ja omistajuus", text: "Tiedämme, kuka vastaa tiedon laadusta, kun ongelmia ilmenee." },
+      { category: "Vastuut ja omistajuus", text: "Liiketoiminnan ja IT:n vastuut tiedonhallinnassa ovat selkeät." },
+
+      { category: "Tiedon laatu ja luotettavuus", text: "Luotamme siihen, että kriittinen liiketoimintadata on riittävän laadukasta päätöksenteon tueksi." },
+      { category: "Tiedon laatu ja luotettavuus", text: "Tiedon laatuongelmat tunnistetaan, priorisoidaan ja korjataan systemaattisesti." },
+      { category: "Tiedon laatu ja luotettavuus", text: "Keskeiset tiedot ja käsitteet ymmärretään samalla tavalla eri yksiköissä ja järjestelmissä." },
+
+      { category: "Tiedon hallinta ja löydettävyys", text: "Löydämme tarvitsemamme tiedot ja niiden kuvaukset nopeasti." },
+      { category: "Tiedon hallinta ja löydettävyys", text: "Tiedämme, mistä kriittinen tieto tulee, miten se muuttuu ja missä sitä käytetään." },
+      { category: "Tiedon hallinta ja löydettävyys", text: "Keskeisiä perustietoja, kuten asiakas-, tuote-, toimittaja- tai henkilötietoja, hallitaan yhteisten määritelmien ja toimintatapojen mukaisesti." },
+
+      { category: "AI- ja analytiikkavalmius", text: "Nykyinen dataympäristömme tukee analytiikan ja tekoälyn hyödyntämistä." },
+      { category: "AI- ja analytiikkavalmius", text: "Tunnistamme tekoälyn käyttöön liittyvät datariskit, vastuut ja tietosuojavaatimukset." },
+      { category: "AI- ja analytiikkavalmius", text: "Tiedonhallintamme mahdollistaa onnistuneiden analytiikka- ja tekoälyratkaisujen laajentamisen yksittäisiä kokeiluja pidemmälle." }
+    ];
+
+    const scale = [
+      { value: 1, label: "Ei toteudu" },
+      { value: 2, label: "Toteutuu vähän" },
+      { value: 3, label: "Toteutuu osittain" },
+      { value: 4, label: "Toteutuu pääosin" },
+      { value: 5, label: "Toteutuu täysin" }
+    ];
+
+    let current = 0;
+    let answers = Array(questions.length).fill(null);
+
+    const hero = document.getElementById("hero");
+    const assessment = document.getElementById("assessment");
+    const results = document.getElementById("results");
+    const choices = document.getElementById("choices");
+    const errorMessage = document.getElementById("errorMessage");
+
+    document.getElementById("startButton").addEventListener("click", () => {
+      assessment.classList.add("active");
+      assessment.scrollIntoView({ behavior: "smooth", block: "start" });
+      renderQuestion();
+    });
+
+    document.getElementById("backButton").addEventListener("click", () => {
+      if (current > 0) { current--; renderQuestion(); }
+      else { assessment.classList.remove("active"); hero.scrollIntoView({ behavior: "smooth" }); }
+    });
+
+    document.getElementById("nextButton").addEventListener("click", () => {
+      if (answers[current] === null) {
+        errorMessage.textContent = "Valitse ensin yksi vaihtoehto.";
+        return;
+      }
+      if (current < questions.length - 1) {
+        current++;
+        renderQuestion();
+      } else {
+        showResults();
+      }
+    });
+
+    document.getElementById("restartButton").addEventListener("click", () => {
+      answers = Array(questions.length).fill(null);
+      current = 0;
+      results.classList.remove("active");
+      assessment.classList.add("active");
+      renderQuestion();
+      assessment.scrollIntoView({ behavior: "smooth" });
+    });
+
+    document.getElementById("contactButton").addEventListener("click", () => {
+      alert("Prototyypissä yhteydenottolomaketta ei ole vielä kytketty. Ennen julkaisua painike voidaan ohjata hyväksyttyyn Loihteen yhteydenottokanavaan.");
+    });
+
+    function renderQuestion() {
+      errorMessage.textContent = "";
+      const q = questions[current];
+      document.getElementById("categoryChip").textContent = q.category;
+      document.getElementById("questionNumber").textContent = `Väittämä ${current + 1}`;
+      document.getElementById("questionText").textContent = q.text;
+      document.getElementById("progressLabel").textContent = `${current + 1} / ${questions.length}`;
+      const percent = Math.round(((current + 1) / questions.length) * 100);
+      document.getElementById("progressPercent").textContent = `${percent} %`;
+      document.getElementById("progressBar").style.width = `${percent}%`;
+      document.getElementById("nextButton").textContent = current === questions.length - 1 ? "Näytä tulokset" : "Seuraava";
+
+      choices.innerHTML = "";
+      scale.forEach(item => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "choice" + (answers[current] === item.value ? " selected" : "");
+        button.setAttribute("aria-pressed", answers[current] === item.value ? "true" : "false");
+        button.innerHTML = `<strong>${item.value}</strong><small>${item.label}</small>`;
+        button.addEventListener("click", () => {
+          answers[current] = item.value;
+          renderQuestion();
+        });
+        choices.appendChild(button);
+      });
+    }
+
+    function showResults() {
+      const categories = [...new Set(questions.map(q => q.category))];
+      const scores = categories.map(category => {
+        const values = answers.filter((_, i) => questions[i].category === category);
+        return values.reduce((a, b) => a + b, 0) / values.length;
+      });
+      const overall = answers.reduce((a, b) => a + b, 0) / answers.length;
+      const strongestIndex = scores.indexOf(Math.max(...scores));
+      const weakestIndex = scores.indexOf(Math.min(...scores));
+      const maturity = getMaturity(overall);
+
+      document.getElementById("overallScore").textContent = overall.toFixed(1).replace(".", ",");
+      document.getElementById("maturityLevel").textContent = maturity.level;
+      document.getElementById("resultHeadline").textContent = maturity.headline;
+      document.getElementById("resultDescription").textContent = maturity.description;
+      document.getElementById("strongestArea").textContent = categories[strongestIndex];
+      document.getElementById("developmentArea").textContent = categories[weakestIndex];
+
+      const list = document.getElementById("categoryScores");
+      list.innerHTML = "";
+      categories.forEach((category, i) => {
+        list.innerHTML += `
+          <div>
+            <div class="score-row-header"><span>${category}</span><strong>${scores[i].toFixed(1).replace(".", ",")} / 5</strong></div>
+            <div class="mini-track"><div class="mini-fill" style="width:${scores[i] / 5 * 100}%"></div></div>
+          </div>`;
+      });
+
+      drawRadar(categories, scores);
+      assessment.classList.remove("active");
+      results.classList.add("active");
+      results.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    function getMaturity(score) {
+      if (score < 2.0) return {
+        level: "Lähtökuopissa",
+        headline: "Perusta kannattaa rakentaa ensin.",
+        description: "Tiedonhallinta on vielä pääosin henkilö- tai tilannekohtaista. Selkeät omistajuudet, yhteiset määritelmät ja tiedon laadun toimintatavat luovat perustan tiedolla johtamiselle ja tekoälyn turvalliselle hyödyntämiselle."
+      };
+      if (score < 3.1) return {
+        level: "Kehittymässä",
+        headline: "Hyvä alku, mutta käytännöt kaipaavat yhtenäistämistä.",
+        description: "Organisaatiossa on jo toimivia käytäntöjä, mutta niiden kattavuus ja johdonmukaisuus vaihtelevat. Seuraava askel on priorisoida tärkeimmät tietoalueet ja vakiinnuttaa vastuut, laadunhallinta sekä yhteiset toimintatavat."
+      };
+      if (score < 4.1) return {
+        level: "Hallinnassa",
+        headline: "Tiedonhallinta tukee jo liiketoimintaa.",
+        description: "Keskeiset tiedonhallinnan rakenteet ovat olemassa. Suurin lisäarvo syntyy nyt mittaamisesta, toimintatapojen laajentamisesta ja siitä, että governance kytketään järjestelmällisesti analytiikka- ja tekoälyratkaisuihin."
+      };
+      return {
+        level: "AI-valmis",
+        headline: "Vahva perusta skaalautuvalle hyödyntämiselle.",
+        description: "Tiedon omistajuus, laatu, löydettävyys ja riskienhallinta muodostavat vahvan perustan analytiikalle ja tekoälylle. Seuraava askel on jatkuva parantaminen, liiketoimintahyötyjen seuranta ja kyvykkyyksien laajentaminen uusille alueille."
+      };
+    }
+
+    function drawRadar(labels, values) {
+      const canvas = document.getElementById("radarChart");
+      const dpr = window.devicePixelRatio || 1;
+      const cssWidth = Math.min(canvas.parentElement.clientWidth - 40, 520);
+      const cssHeight = 420;
+      canvas.width = cssWidth * dpr;
+      canvas.height = cssHeight * dpr;
+      canvas.style.width = `${cssWidth}px`;
+      canvas.style.height = `${cssHeight}px`;
+      const ctx = canvas.getContext("2d");
+      ctx.scale(dpr, dpr);
+
+      const cx = cssWidth / 2;
+      const cy = cssHeight / 2 - 4;
+      const radius = Math.min(cssWidth, cssHeight) * .31;
+      const count = labels.length;
+      const angleStep = Math.PI * 2 / count;
+      const start = -Math.PI / 2;
+
+      ctx.clearRect(0, 0, cssWidth, cssHeight);
+      ctx.font = "12px Arial";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+
+      for (let level = 1; level <= 5; level++) {
+        ctx.beginPath();
+        for (let i = 0; i < count; i++) {
+          const a = start + i * angleStep;
+          const r = radius * level / 5;
+          const x = cx + Math.cos(a) * r;
+          const y = cy + Math.sin(a) * r;
+          i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+        }
+        ctx.closePath();
+        ctx.strokeStyle = level === 5 ? "#d7cfdb" : "#ece7ef";
+        ctx.stroke();
+      }
+
+      for (let i = 0; i < count; i++) {
+        const a = start + i * angleStep;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(cx + Math.cos(a) * radius, cy + Math.sin(a) * radius);
+        ctx.strokeStyle = "#e3dce7";
+        ctx.stroke();
+
+        const labelRadius = radius + 52;
+        const x = cx + Math.cos(a) * labelRadius;
+        const y = cy + Math.sin(a) * labelRadius;
+        const words = labels[i].split(" ");
+        const lines = [];
+        let line = "";
+        words.forEach(word => {
+          const test = line ? `${line} ${word}` : word;
+          if (ctx.measureText(test).width > 120 && line) { lines.push(line); line = word; }
+          else line = test;
+        });
+        lines.push(line);
+        ctx.fillStyle = "#4e4852";
+        lines.forEach((text, index) => ctx.fillText(text, x, y + (index - (lines.length - 1) / 2) * 15));
+      }
+
+      ctx.beginPath();
+      values.forEach((value, i) => {
+        const a = start + i * angleStep;
+        const r = radius * value / 5;
+        const x = cx + Math.cos(a) * r;
+        const y = cy + Math.sin(a) * r;
+        i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+      });
+      ctx.closePath();
+      ctx.fillStyle = "rgba(111,44,145,.20)";
+      ctx.fill();
+      ctx.strokeStyle = "#6f2c91";
+      ctx.lineWidth = 3;
+      ctx.stroke();
+
+      values.forEach((value, i) => {
+        const a = start + i * angleStep;
+        const r = radius * value / 5;
+        const x = cx + Math.cos(a) * r;
+        const y = cy + Math.sin(a) * r;
+        ctx.beginPath();
+        ctx.arc(x, y, 5, 0, Math.PI * 2);
+        ctx.fillStyle = "#ef6a4c";
+        ctx.fill();
+        ctx.strokeStyle = "white";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      });
+    }
+  </script>
 </body>
 </html>
